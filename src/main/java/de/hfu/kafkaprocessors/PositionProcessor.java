@@ -35,9 +35,9 @@ public class PositionProcessor {
     Map<String, PayloadPosition> latestPositions = new HashMap<>();
 
     private static final BackgroundColorCommand backgroundColorTooClose = new BackgroundColorCommand(255, 0, 0);
-    private static final BackgroundColorCommand backgroundColorClose = new BackgroundColorCommand(100, 100, 0);
+    private static final BackgroundColorCommand backgroundColorClose = new BackgroundColorCommand(150, 150, 0);
     private static final BackgroundColorCommand backgroundColorFar = new BackgroundColorCommand(0, 255, 0);
-    private static final VelocityCommand movementCommandCircle = new VelocityCommand(new Vector3(2, 0, 0), new Vector3(0, 0, 2));
+    private static final VelocityCommand movementCommandCircle = new VelocityCommand(new Vector3(1, 0, 0), new Vector3(0, 0, 1));
     private static final VelocityCommand movementCommandStop = new VelocityCommand(Vector3.zero(), Vector3.zero());
 
     private BackgroundColorCommand currentBackgroundColor = null;
