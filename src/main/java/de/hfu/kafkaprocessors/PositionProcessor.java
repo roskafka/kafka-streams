@@ -96,7 +96,7 @@ public class PositionProcessor {
                 .filter((key, backgroundColorCommand) -> !backgroundColorCommand.equals(currentBackgroundColor))
                 .mapValues(backgroundColorCommand -> {
                     currentBackgroundColor = backgroundColorCommand;
-                    return new MessageOut(new MetaData("klaus", "klaus", "geometry/msg/Twist"), backgroundColorCommand);
+                    return new MessageOut(new MetaData("klaus", "klaus", "color"), backgroundColorCommand);
                 })
                 .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: {}", backgroundColorCommand))
 
