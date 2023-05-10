@@ -23,7 +23,7 @@ import java.util.Map;
 public class PositionProcessor {
 
     private static final String INPUT_TOPIC = "positions";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
     private static final double THRESHOLD_DISTANCE = 0.1;
@@ -39,7 +39,7 @@ public class PositionProcessor {
         // one position contains the position of one robot
         // when the robots are far away from each other, start the stopped robot
         positions
-                .map((key, message) -> new KeyValue<>(message.meta().robot(), message.payload()))
+                .map((key, message) -> new KeyValue<>(message.metadata().mapping(), message.payload()))
                 .map((robot, payload) -> {
                     latestPositions.put(robot, payload);
                     logger.info("Received position of robot {} at ({}, {})", robot, payload.x(), payload.y());

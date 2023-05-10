@@ -25,9 +25,9 @@ public class JSONSerde<T extends JSONSerdeCompatible> implements Serializer<T>, 
         }
         try {
             JsonNode node = OBJECT_MAPPER.readTree(data);
-            String type = node.get("meta").get("type").asText();
+            String type = node.get("metadata").get("type").asText();
             switch (type) {
-                case "message":
+                case "turtlesim/msg/Pose":
                     return (T) OBJECT_MAPPER.convertValue(node, Message.class);
                 default:
                     throw new SerializationException("Unknown type: " + type);
