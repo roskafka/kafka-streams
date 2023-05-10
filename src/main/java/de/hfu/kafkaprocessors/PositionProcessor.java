@@ -23,7 +23,7 @@ public class PositionProcessor {
 
     private static final String COLOR_OUTPUT_TOPIC = "_backgroundcolor";
 
-    private static final String MOVEMENT_OUTPUT_TOPIC = "_klaus_movementCommand";      // TODO: klaus is hardcoded here
+    private static final String MOVEMENT_OUTPUT_TOPIC = "_klaus_movementCommands";      // TODO: klaus is hardcoded here
 
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
