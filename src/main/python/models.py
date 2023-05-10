@@ -9,6 +9,23 @@ class PayloadPosition(BaseModel):
     angular_velocity: float
 
 
+class Vector3(BaseModel):
+    x: float
+    y: float
+    z: float
+
+
+class PayloadVelocity(BaseModel):
+    linear: Vector3
+    angular: Vector3
+
+
+class PayloadBackgroundColor(BaseModel):
+    r: int
+    g: int
+    b: int
+
+
 class MetaData(BaseModel):
     robot: str
     topic: str
@@ -16,16 +33,5 @@ class MetaData(BaseModel):
 
 
 class Message(BaseModel):
-    payload: PayloadPosition
+    payload: PayloadPosition | PayloadVelocity
     meta: MetaData
-
-
-class Vector3(BaseModel):
-    x: float
-    y: float
-    z: float
-
-
-class VelocityCommand(BaseModel):
-    linear: Vector3
-    angular: Vector3
