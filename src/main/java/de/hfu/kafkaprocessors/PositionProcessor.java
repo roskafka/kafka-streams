@@ -68,7 +68,7 @@ public class PositionProcessor {
         distances
                 .filter((key, distance) -> distance < THRESHOLD_DISTANCE_TOO_CLOSE && !robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = true)
-                .mapValues(distance -> movementCommandStop)
+                .mapValues(distance -> new MessageOut(new MetaData("klaus", "klaus", "geometry/msg/Twist"), movementCommandStop))
                 .peek((key, distance) -> logger.info("Robot 1 stopped"))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
 
@@ -76,7 +76,7 @@ public class PositionProcessor {
         distances
                 .filter((key, distance) -> distance > THRESHOLD_DISTANCE_TOO_CLOSE && robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = false)
-                .mapValues(distance -> movementCommandCircle)
+                .mapValues(distance -> new MessageOut(new MetaData("klaus", "klaus", "geometry/msg/Twist"), movementCommandCircle))
                 .peek((key, distance) -> logger.info("Robot 1 started"))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
 
@@ -96,9 +96,10 @@ public class PositionProcessor {
                 .filter((key, backgroundColorCommand) -> !backgroundColorCommand.equals(currentBackgroundColor))
                 .mapValues(backgroundColorCommand -> {
                     currentBackgroundColor = backgroundColorCommand;
-                    return backgroundColorCommand;
+                    return new MessageOut(new MetaData("klaus", "klaus", "geometry/msg/Twist"), backgroundColorCommand);
                 })
                 .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: {}", backgroundColorCommand))
+
                 .to(COLOR_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
     }
 
