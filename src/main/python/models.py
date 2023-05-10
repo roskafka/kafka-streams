@@ -27,11 +27,11 @@ class PayloadBackgroundColor(BaseModel):
 
 
 class MetaData(BaseModel):
-    robot: str
-    topic: str
+    mapping: str
+    source: str
     type: str
 
 
 class Message(BaseModel):
     payload: PayloadPosition | PayloadVelocity
-    meta: MetaData
+    metadata: MetaData

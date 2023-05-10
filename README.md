@@ -22,6 +22,3 @@ pose:
 
 Input: Globale Sicht
 Output: Lokale Sicht
-
-
-glpat-6gxZ4AdeAcEdqyDaA5yY

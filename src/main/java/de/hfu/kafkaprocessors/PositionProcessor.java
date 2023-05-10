@@ -1,9 +1,6 @@
 package de.hfu.kafkaprocessors;
 
-import de.hfu.kafkaprocessors.messages.Message;
-import de.hfu.kafkaprocessors.messages.PayloadPosition;
-import de.hfu.kafkaprocessors.messages.Vector3;
-import de.hfu.kafkaprocessors.messages.VelocityCommand;
+import de.hfu.kafkaprocessors.messages.*;
 import de.hfu.kafkaprocessors.serialization.JSONSerde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -24,11 +21,27 @@ public class PositionProcessor {
 
     private static final String INPUT_TOPIC = "positions";
 
+    private static final String COLOR_OUTPUT_TOPIC = "_backgroundcolor";
+
+    private static final String MOVEMENT_OUTPUT_TOPIC = "_robot1_movementCommand";      // TODO: robot1 is hardcoded here
+
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
-    private static final double THRESHOLD_DISTANCE = 0.1;
+    private static final double THRESHOLD_DISTANCE_TOO_CLOSE = 1;
+    private static final double THRESHOLD_DISTANCE_CLOSE = 2;
+
+
 
     Map<String, PayloadPosition> latestPositions = new HashMap<>();
+
+    private static final BackgroundColorCommand backgroundColorTooClose = new BackgroundColorCommand(255, 0, 0);
+    private static final BackgroundColorCommand backgroundColorClose = new BackgroundColorCommand(100, 100, 0);
+    private static final BackgroundColorCommand backgroundColorFar = new BackgroundColorCommand(0, 255, 0);
+    private static final VelocityCommand movementCommandCircle = new VelocityCommand(new Vector3(1, 0, 0), new Vector3(0, 0, 1));
+    private static final VelocityCommand movementCommandStop = new VelocityCommand(Vector3.zero(), Vector3.zero());
+
+    private BackgroundColorCommand currentBackgroundColor = null;
+    private boolean robot1Stopped = false;
 
     @Autowired
     public void createPositionsStream(final StreamsBuilder builder) {
@@ -38,29 +51,59 @@ public class PositionProcessor {
         // if so, stop one robot
         // one position contains the position of one robot
         // when the robots are far away from each other, start the stopped robot
-        positions
+        KStream<String, Float> distances = positions
                 .map((key, message) -> new KeyValue<>(message.metadata().mapping(), message.payload()))
                 .map((robot, payload) -> {
                     latestPositions.put(robot, payload);
                     logger.info("Received position of robot {} at ({}, {})", robot, payload.x(), payload.y());
                     PayloadPosition otherRobot = getOtherRobot(robot);
-                    boolean stop = false;
+                    float distance = Float.MAX_VALUE;
                     if (otherRobot != null) {
-                        stop = stopIfClose(payload.x(), payload.y(), otherRobot.x(), otherRobot.y());
+                        distance = getDistance(payload.x(), payload.y(), otherRobot.x(), otherRobot.y());
                     }
-                    logger.info("Stop: {}", stop);
-                    String robotToStop = stop ? "robot1" : null;    // TODO: robot1 is hardcoded
-                    return new KeyValue<>(robotToStop, new VelocityCommand(Vector3.zero(), Vector3.zero()));
-                }).filter((robot, velocityCommand) -> robot != null)
-                .to("_robot1_movementCommand", Produced.with(Serdes.String(), new JSONSerde<>()));  // TODO: robot1 is hardcoded
+                    logger.info("distance: {}", distance);
+                    return new KeyValue<>("", distance);
+                });
+
+        distances
+                .filter((key, distance) -> distance < THRESHOLD_DISTANCE_TOO_CLOSE && !robot1Stopped)
+                .peek((key, distance) -> robot1Stopped = true)
+                .mapValues(distance -> movementCommandStop)
+                .peek((key, distance) -> logger.info("Robot 1 stopped"))
+                .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
+
+        // send drive command, when distance is far enough
+        distances
+                .filter((key, distance) -> distance > THRESHOLD_DISTANCE_TOO_CLOSE && robot1Stopped)
+                .peek((key, distance) -> robot1Stopped = false)
+                .mapValues(distance -> movementCommandCircle)
+                .peek((key, distance) -> logger.info("Robot 1 started"))
+                .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
+
+        // output color based on distance
+        distances
+                .mapValues(distance -> {
+                    BackgroundColorCommand backgroundColorCommand = null;
+                    if (distance < THRESHOLD_DISTANCE_TOO_CLOSE) {
+                        backgroundColorCommand = backgroundColorTooClose;
+                    } else if (distance < THRESHOLD_DISTANCE_CLOSE) {
+                        backgroundColorCommand = backgroundColorClose;
+                    } else {
+                        backgroundColorCommand = backgroundColorFar;
+                    }
+                    return backgroundColorCommand;
+                })
+                .filter((key, backgroundColorCommand) -> !backgroundColorCommand.equals(currentBackgroundColor))
+                .mapValues(backgroundColorCommand -> {
+                    currentBackgroundColor = backgroundColorCommand;
+                    return backgroundColorCommand;
+                })
+                .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: {}", backgroundColorCommand))
+                .to(COLOR_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
     }
 
     private float getDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-
-    private boolean stopIfClose(float x1, float y1, float x2, float y2) {
-        return getDistance(x1, y1, x2, y2) < THRESHOLD_DISTANCE;
     }
 
     private PayloadPosition getOtherRobot(String thisRobot) {
