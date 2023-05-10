@@ -27,8 +27,8 @@ public class PositionProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
-    private static final double THRESHOLD_DISTANCE_TOO_CLOSE = 2;
-    private static final double THRESHOLD_DISTANCE_CLOSE = 3;
+    private static final double THRESHOLD_DISTANCE_TOO_CLOSE = 3;
+    private static final double THRESHOLD_DISTANCE_CLOSE = 4;
 
 
 
