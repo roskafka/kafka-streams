@@ -3,8 +3,11 @@ package de.hfu.kafkaprocessors;
 import de.hfu.kafkaprocessors.custumprocessors.DistanceProcessor;
 import de.hfu.kafkaprocessors.messages.*;
 import de.hfu.kafkaprocessors.serialization.JSONSerde;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
@@ -12,10 +15,8 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+@ApplicationScoped
 public class PositionProcessor {
 
     private static final String INPUT_TOPIC = "positions";
@@ -39,9 +40,10 @@ public class PositionProcessor {
     private BackgroundColorCommand currentBackgroundColor = null;
     private boolean robot1Stopped = false;
 
-    @Autowired
-    public void createPositionsStream(final StreamsBuilder builder) {
+    @Produces
+    public Topology createPositionsStream() {
 
+        StreamsBuilder builder = new StreamsBuilder();
         // create store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.inMemoryKeyValueStore("turtleBotPositions"),
@@ -92,5 +94,7 @@ public class PositionProcessor {
                 .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: {}", backgroundColorCommand))
 
                 .to(COLOR_OUTPUT_TOPIC, Produced.with(Serdes.String(), new JSONSerde<>()));
+
+        return builder.build();
     }
 }
