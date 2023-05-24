@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.hfu.kafkaprocessors.messages.Message;
 import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
@@ -16,6 +17,12 @@ public class JSONSerde<T extends JSONSerdeCompatible> implements Serializer<T>, 
 
     @Override
     public void configure(final Map<String, ?> configs, final boolean isKey) {}
+
+    @Override
+    public T deserialize(String topic, Headers headers, byte[] data) {
+        byte[] type = headers.lastHeader("type").value();
+        String typeString = new String(type);
+    }
 
     @SuppressWarnings("unchecked")
     @Override

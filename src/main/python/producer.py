@@ -14,7 +14,7 @@ def send_position(x, y, robot):
         payload=PayloadPosition(x=x, y=y, theta=0, linear_velocity=1, angular_velocity=1),
         metadata=MetaData(mapping=f"robot-{robot}", source="positions", type="turtlesim/msg/Pose")
     )
-    producer.send('positions', key=f"robot-{robot}".encode("utf-8"), value=data)
+    producer.send('positions', key=f"robot-{robot}".encode("utf-8"), value=data, headers=[("type", b"position")])
     print(f"Sent position {robot=} {x=} {y=} now={datetime.now()}")
 
 
