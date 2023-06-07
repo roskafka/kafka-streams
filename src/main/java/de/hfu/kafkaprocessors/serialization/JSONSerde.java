@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.hfu.kafkaprocessors.messages.Message;
 import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JSONSerde<T extends JSONSerdeCompatible> implements Serializer<T>, Deserializer<T>, Serde<T> {
@@ -18,28 +18,18 @@ public class JSONSerde<T extends JSONSerdeCompatible> implements Serializer<T>, 
     @Override
     public void configure(final Map<String, ?> configs, final boolean isKey) {}
 
-    @Override
-    public T deserialize(String topic, Headers headers, byte[] data) {
-        byte[] type = headers.lastHeader("type").value();
-        String typeString = new String(type);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public T deserialize(final String topic, final byte[] data) {
         if (data == null) {
             return null;
         }
+        Map<String, Class<T>> mappings = new HashMap<>();
+        mappings.put("turtlesim/msg/Pose", (Class<T>) Message.class);
         try {
             JsonNode node = OBJECT_MAPPER.readTree(data);
             String type = node.get("metadata").get("type").asText();
-            switch (type) {
-                case "turtlesim/msg/Pose":
-                    return (T) OBJECT_MAPPER.convertValue(node, Message.class);
-                default:
-                    throw new SerializationException("Unknown type: " + type);
-            }
-
+            return OBJECT_MAPPER.readValue(data, mappings.get(type));
         } catch (final IOException e) {
             e.printStackTrace();
             System.err.println("Error deserializing JSON message ");
