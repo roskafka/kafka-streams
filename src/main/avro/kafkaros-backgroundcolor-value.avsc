@@ -1,0 +1,1 @@
+{"type":"record","name":"Color","namespace":"de.hfu","fields":[{"name":"r","type":"int"},{"name":"g","type":"int"},{"name":"b","type":"int"}]}

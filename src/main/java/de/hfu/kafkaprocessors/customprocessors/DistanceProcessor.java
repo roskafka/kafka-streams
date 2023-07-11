@@ -1,8 +1,7 @@
-package de.hfu.kafkaprocessors.custumprocessors;
+package de.hfu.kafkaprocessors.customprocessors;
 
+import de.hfu.Pose;
 import de.hfu.kafkaprocessors.PositionProcessor;
-import de.hfu.kafkaprocessors.messages.Message;
-import de.hfu.kafkaprocessors.messages.PayloadPosition;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
@@ -12,10 +11,10 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DistanceProcessor implements Processor<String, Message, String, Float> {
+public class DistanceProcessor implements Processor<String, Pose, String, Float> {
 
-    private ProcessorContext context;
-    private KeyValueStore<String, Message> positionStore;
+    private ProcessorContext<String, Float> context;
+    private KeyValueStore<String, Pose> positionStore;
 
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
@@ -30,18 +29,18 @@ public class DistanceProcessor implements Processor<String, Message, String, Flo
 
 
     @Override
-    public void process(Record<String, Message> record) {
+    public void process(Record<String, Pose> record) {
 
         System.out.println(record.value());
         System.out.println("Headers: " + record.headers());
 
         positionStore.put(record.key(), record.value());
-        logger.info("Received position of robot {} at ({}, {})", record.key(), record.value().payload().x(), record.value().payload().y());
-        PayloadPosition otherRobot = getOtherRobot(record.key());
+        logger.info("Received position of robot {} at ({}, {})", record.key(), record.value().getX(), record.value().getY());
+        Pose otherRobot = getOtherRobot(record.key());
 
         float distance = Float.MAX_VALUE;
         if (otherRobot != null) {
-            distance = getDistance(record.value().payload().x(), record.value().payload().y(), otherRobot.x(), otherRobot.y());
+            distance = getDistance(record.value().getX(), record.value().getY(), otherRobot.getX(), otherRobot.getY());
         }
         logger.info("distance: {}", distance);
 
@@ -54,22 +53,22 @@ public class DistanceProcessor implements Processor<String, Message, String, Flo
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    private PayloadPosition getOtherRobot(String thisRobot) {
+    private Pose getOtherRobot(String thisRobot) {
 
-        KeyValueIterator<String, Message> it = positionStore.all();
+        KeyValueIterator<String, Pose> it = positionStore.all();
 
         while (it.hasNext()) {
 
 
             positionStore.delete("robot-2");
-            KeyValue<String, Message> robotRecord = it.next();
+            KeyValue<String, Pose> robotRecord = it.next();
             logger.info(robotRecord.toString());
 
 
             String robot = robotRecord.key;
 
             if (!robot.equals(thisRobot)) {
-                return positionStore.get(robot).payload();
+                return positionStore.get(robot);
             }
         }
 

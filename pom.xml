@@ -105,12 +105,12 @@
                 <version>7.4.0</version>
                 <configuration>
                     <schemaRegistryUrls>
-                        <param>http://localhost:8081</param>
+                        <param>http://141.28.73.94:8081</param>
                     </schemaRegistryUrls>
                     <outputDirectory>src/main/avro</outputDirectory>
                     <subjectPatterns>
-                        <param>^roskafka-(.*)-(key|value)$</param>
-                        <param>^kafkaros-(.*)-(key|value)$</param>
+                        <param>^roskafka(.*)-(key|value)$</param>
+                        <param>^kafkaros(.*)-(key|value)$</param>
                     </subjectPatterns>
                 </configuration>
             </plugin>

@@ -1,4 +1,4 @@
 quarkus:
   kafka-streams:
     bootstrap-servers: localhost:9092
-    topics: positions,_backgroundcolor,_klaus_movementCommands
+    topics: roskafka-positions,kafkaros-backgroundcolor,kafkaros_klaus_movementCommands

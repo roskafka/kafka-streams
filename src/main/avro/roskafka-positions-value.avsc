@@ -1,0 +1,1 @@
+{"type":"record","name":"Pose","namespace":"de.hfu","fields":[{"name":"x","type":"float"},{"name":"y","type":"float"},{"name":"theta","type":"float"},{"name":"linear_velocity","type":"float"},{"name":"angular_velocity","type":"float"}]}

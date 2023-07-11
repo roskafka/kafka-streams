@@ -1,0 +1,1 @@
+{"type":"record","name":"Twist","namespace":"de.hfu","fields":[{"name":"linear","type":{"type":"record","name":"Vector3","fields":[{"name":"x","type":"double"},{"name":"y","type":"double"},{"name":"z","type":"double"}]}},{"name":"angular","type":"Vector3"}]}
