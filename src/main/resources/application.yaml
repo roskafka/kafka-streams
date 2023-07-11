@@ -1,4 +1,6 @@
 quarkus:
   kafka-streams:
+    application-id: turtlesim-streams
+    schema-registry-url: http://localhost:8081
     bootstrap-servers: localhost:9092
     topics: roskafka-positions,kafkaros-backgroundcolor,kafkaros_klaus_movementCommands
