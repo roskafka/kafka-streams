@@ -32,7 +32,7 @@ public class PositionProcessor {
 
     private static final String COLOR_OUTPUT_TOPIC = "kafkaros-backgroundcolor";
 
-    private static final String MOVEMENT_OUTPUT_TOPIC = "kafkaros_klaus_movementCommands";      // TODO: klaus is hardcoded here
+    private static final String MOVEMENT_OUTPUT_TOPIC = "kafkaros-movementCommands";      // TODO: klaus is hardcoded here
 
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
