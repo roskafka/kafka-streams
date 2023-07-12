@@ -39,7 +39,7 @@ public class DistanceProcessor implements Processor<String, Pose, String, Float>
         if (otherRobot != null) {
             distance = getDistance(record.value().getX(), record.value().getY(), otherRobot.getX(), otherRobot.getY());
         }
-        logger.info("distance={}", distance);
+        logger.debug("distance={}", distance);
 
         Record<String, Float> distanceRecord = new Record<>(record.key(), distance,  System.currentTimeMillis());
         context.forward(distanceRecord);
