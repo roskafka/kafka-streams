@@ -78,7 +78,7 @@ public class PositionProcessor {
         KStream<String, Pose> positions = builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), poseSerde));
 
         KStream<String, Float> distances = positions
-                .peek((key, pose) -> logger.info("Received position: key={} pose={}", key, pose))
+                .peek((key, pose) -> logger.debug("Received position: key={} pose={}", key, pose))
                 .process(DistanceProcessor::new, "turtleBotPositions");
 
 
@@ -86,7 +86,7 @@ public class PositionProcessor {
                 .filter((key, distance) -> distance < THRESHOLD_DISTANCE_TOO_CLOSE && !robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = true)
                 .mapValues(distance -> movementCommandStop)
-                .peek((key, distance) -> logger.info("Robot 1 stopped key={} distance={}", key, distance))
+                .peek((key, twist) -> logger.info("Robot stopped key={} value={}", key, twist))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), twistSerde));
 
         // send drive command, when distance is far enough
@@ -94,7 +94,7 @@ public class PositionProcessor {
                 .filter((key, distance) -> distance > THRESHOLD_DISTANCE_TOO_CLOSE && robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = false)
                 .mapValues(distance ->  movementCommandCircle)
-                .peek((key, distance) -> logger.info("Robot 1 started to drive again key={} distance={}", key, distance))
+                .peek((key, twist) -> logger.info("Robot started key={} value={}", key, twist))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), twistSerde));
 
         // output color based on distance
