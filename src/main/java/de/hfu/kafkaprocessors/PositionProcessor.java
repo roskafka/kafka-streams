@@ -86,7 +86,7 @@ public class PositionProcessor {
                 .filter((key, distance) -> distance < THRESHOLD_DISTANCE_TOO_CLOSE && !robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = true)
                 .mapValues(distance -> movementCommandStop)
-                .peek((key, distance) -> logger.info("Robot 1 stopped"))
+                .peek((key, distance) -> logger.info("Robot 1 stopped key={} distance={}", key, distance))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), twistSerde));
 
         // send drive command, when distance is far enough
@@ -94,7 +94,7 @@ public class PositionProcessor {
                 .filter((key, distance) -> distance > THRESHOLD_DISTANCE_TOO_CLOSE && robot1Stopped)
                 .peek((key, distance) -> robot1Stopped = false)
                 .mapValues(distance ->  movementCommandCircle)
-                .peek((key, distance) -> logger.info("Robot 1 started"))
+                .peek((key, distance) -> logger.info("Robot 1 started to drive again key={} distance={}", key, distance))
                 .to(MOVEMENT_OUTPUT_TOPIC, Produced.with(Serdes.String(), twistSerde));
 
         // output color based on distance
@@ -115,8 +115,7 @@ public class PositionProcessor {
                     currentBackgroundColor = backgroundColorCommand;
                     return backgroundColorCommand;
                 })
-                .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: {}", backgroundColorCommand))
-
+                .peek((key, backgroundColorCommand) -> logger.info("Sending background color command: key={} color={}", key, backgroundColorCommand))
                 .to(COLOR_OUTPUT_TOPIC, Produced.with(Serdes.String(), colorSerde));
 
         return builder.build();
