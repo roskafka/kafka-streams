@@ -41,7 +41,7 @@ public class DistanceProcessor implements Processor<String, Pose, String, Float>
         }
         logger.info("distance: {}", distance);
 
-        Record<String, Float> distanceRecord = new Record<>("", distance,  System.currentTimeMillis());
+        Record<String, Float> distanceRecord = new Record<>(record.key(), distance,  System.currentTimeMillis());
         context.forward(distanceRecord);
     }
 
