@@ -32,7 +32,7 @@ public class PositionProcessor {
 
     private static final String COLOR_OUTPUT_TOPIC = "kafkaros-backgroundcolor";
 
-    private static final String MOVEMENT_OUTPUT_TOPIC = "kafkaros-movementCommands";      // TODO: klaus is hardcoded here
+    private static final String MOVEMENT_OUTPUT_TOPIC = "kafkaros-movementCommands";
 
     private static final Logger logger = LoggerFactory.getLogger(PositionProcessor.class);
 
@@ -78,6 +78,7 @@ public class PositionProcessor {
         KStream<String, Pose> positions = builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), poseSerde));
 
         KStream<String, Float> distances = positions
+                .peek((key, pose) -> logger.info("Received position: key={} pose={}", key, pose))
                 .process(DistanceProcessor::new, "turtleBotPositions");
 
 

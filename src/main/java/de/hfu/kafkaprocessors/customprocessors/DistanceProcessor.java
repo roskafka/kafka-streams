@@ -31,11 +31,8 @@ public class DistanceProcessor implements Processor<String, Pose, String, Float>
     @Override
     public void process(Record<String, Pose> record) {
 
-        System.out.println(record.value());
-        System.out.println("Headers: " + record.headers());
-
         positionStore.put(record.key(), record.value());
-        logger.info("Received position of robot {} at ({}, {})", record.key(), record.value().getX(), record.value().getY());
+        // logger.info("Received position of robot {} at ({}, {})", record.key(), record.value().getX(), record.value().getY());
         Pose otherRobot = getOtherRobot(record.key());
 
         float distance = Float.MAX_VALUE;
@@ -58,13 +55,7 @@ public class DistanceProcessor implements Processor<String, Pose, String, Float>
         KeyValueIterator<String, Pose> it = positionStore.all();
 
         while (it.hasNext()) {
-
-
-            positionStore.delete("robot-2");
             KeyValue<String, Pose> robotRecord = it.next();
-            logger.info(robotRecord.toString());
-
-
             String robot = robotRecord.key;
 
             if (!robot.equals(thisRobot)) {
